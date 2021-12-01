@@ -1,0 +1,155 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(readr)
+library(readr)
+library(ggplot2)
+library(tidyverse)
+library(lubridate)
+library(epiR)
+library(incidence)
+library(janitor)
+
+
+influenza_NY <-read_csv("Influenza_Laboratory-Confirmed_Cases_By_County__Beginning_2009-10_Season.csv") %>% 
+  clean_names() %>% remove_empty()
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+head(influenza_NY)
+tail(influenza_NY)
+nrow(influenza_NY)
+ncol(influenza_NY)
+str(influenza_NY)
+summary(influenza_NY)
+
+
+get_dupes(influenza_NY)
+ influenza_NY$week_ending_date = as.Date(influenza_NY$week_ending_date , format = "%m/%d/%Y")
+ class(influenza_NY$week_ending_date)
+ is.na(influenza_NY$week_ending_date)
+ data.frame(influenza_NY)
+ #na.omit 
+ remove_empty(influenza_NY)
+influenza_NY$region <-as.factor(influenza_NY$region)
+class(influenza_NY$region)
+nlevels(influenza_NY$region)
+as.factor(influenza_NY$region)
+influenza_NY$disease <-as.factor(influenza_NY$disease)
+class(influenza_NY$disease)
+
+influenza_NY$county <-as.factor(influenza_NY$county)
+
+capital <- influenza_NY[which(influenza_NY$region == "CAPITAL DISTRICT"),]
+central <- influenza_NY[which(influenza_NY$region == "CENTRAL"),]
+metro <- influenza_NY[which(influenza_NY$region == "METRO"),]
+NYC <- influenza_NY[which(influenza_NY$region == "NYC"),]
+western <- influenza_NY[which(influenza_NY$region == "WESTERN"),]
+
+influenzaA<- influenza_NY[which(influenza_NY$disease == "INFLUENZA_A"),]
+influenzaB<- influenza_NY[which(influenza_NY$disease == "INFLUENZA_B"),]
+influenza_unknown<- influenza_NY[which(influenza_NY$disease== "INFLUENZA_UNSPECIFIED"),]
+
+# data.frame(COVID_Nursing_Home_NY1_nadrop)
+# as.factor(COVID_Nursing_Home_NY1_nadrop$provider_name)
+#as.factor(COVID_Nursing_Home_NY1_nadrop$provider_city)
+# 
+# COVID_Nursing_Home_NY1_nadrop$county <-as.factor(COVID_Nursing_Home_NY1_nadrop$county)
+# class(COVID_Nursing_Home_NY1_nadrop$county)
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+#data summarization
+
+rowMeans(influenza_NY[sapply(influenza_NY, is.numeric)])
+rowSums(influenza_NY[sapply(influenza_NY, is.numeric)])
+colSums(influenza_NY[sapply(influenza_NY, is.numeric)])
+colMeans(influenza_NY[sapply(influenza_NY, is.numeric)])
+
+sum(central$count)
+sum(capital$count)
+sum(metro$count)
+sum(NYC$count)
+sum(western$count)
+sum(influenza_unknown$count)
+sum(influenzaA$count)
+sum(influenzaB$count)
+
+
+t.test(influenza_unknown$count, influenzaA$count)
+t.test(influenza_unknown$count, influenzaB$count)
+t.test(influenzaA$count,influenzaB$count)
+
+t.test(metro$count, NYC$count)
+t.test(NYC$count,capital$count)
+
+```
+
+```{r}
+#Data viszualization
+library(scales)
+library(pacman)
+library(incidence)
+
+
+# below code does not work
+# plot_bydisease <-influenza_NY %>% ggplot(aes(x=disease, y=count))
+# p+geom_point()
+# plot <-influenza_NY %>% ggplot(aes(x=county, y=count))
+# p+geom_point()
+# plot_byregion <-influenza_NY %>% ggplot(aes(x=region, y=count))
+# p+geom_point()
+
+ggplot(influenza_NY, aes(x=region, y=count)) +
+  geom_boxplot()
+ggplot(influenza_NY, aes(x=disease, y=count)) +
+  geom_boxplot()
+ggplot(influenza_NY, aes(x=county, y=count)) +
+  geom_boxplot()
+
+
+
+ggplot(influenza_NY, aes(x= influenza_NY$week_ending_date , y=count)) +
+  geom_line(aes(color = week_ending_date))
+ggplot(influenza_NY, aes(x= influenza_NY$season , y=count)) +
+  geom_line(aes(color = season))
+ggplot(influenza_NY, aes(x= influenza_NY$week_ending_date , y=count)) +
+  geom_line(aes(color = disease))
+
+
+epicurve_daterange <- function() {
+  seq(from = as.Date("2009-10-10"), to = as.Date("2021-11-13"), by = 30,name = "Date")
+}
+
+epicurve <- ggplot(data = influenza_NY, aes(x = week_ending_date, group = disease, fill = disease))+
+  geom_histogram(aes(y = count), binwidth = 7, size = 0.1, stat = "identity", position="identity") +
+  scale_x_date(breaks = epicurve_daterange(), labels = epicurve_daterange())+
+  theme(axis.text.x= element_text(angle = 90, hjust = 1))+
+  scale_fill_manual(values=c("orange", "blue", "green", "purple"), name = "disease") + facet_grid(disease ~ .)+
+ggtitle("Epidemic Curve of Influenza")
+
+print(epicurve)
+
+# ggplot(influenza_NY, aes(x= influenza_NY$disease , y=count)) +
+#   geom_line(aes(color = week_ending_date))
+```
+
