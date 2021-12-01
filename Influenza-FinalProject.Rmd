@@ -127,7 +127,8 @@ ggplot(influenza_NY, aes(x= influenza_NY$week_ending_date , y=count)) +
 ggplot(influenza_NY, aes(x= influenza_NY$season , y=count)) +
   geom_line(aes(color = season))
 ggplot(influenza_NY, aes(x= influenza_NY$week_ending_date , y=count)) +
-  geom_line(aes(color = disease))
+  geom_line(aes(color = disease)) +
+  facet_grid(disease ~ .)
 
 
 epicurve_daterange <- function() {
