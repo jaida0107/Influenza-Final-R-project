@@ -67,12 +67,6 @@ influenzaA<- influenza_NY[which(influenza_NY$disease == "INFLUENZA_A"),]
 influenzaB<- influenza_NY[which(influenza_NY$disease == "INFLUENZA_B"),]
 influenza_unknown<- influenza_NY[which(influenza_NY$disease== "INFLUENZA_UNSPECIFIED"),]
 
-# data.frame(COVID_Nursing_Home_NY1_nadrop)
-# as.factor(COVID_Nursing_Home_NY1_nadrop$provider_name)
-#as.factor(COVID_Nursing_Home_NY1_nadrop$provider_city)
-# 
-# COVID_Nursing_Home_NY1_nadrop$county <-as.factor(COVID_Nursing_Home_NY1_nadrop$county)
-# class(COVID_Nursing_Home_NY1_nadrop$county)
 
 ```
 
