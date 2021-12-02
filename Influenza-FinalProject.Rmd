@@ -147,4 +147,24 @@ print(epicurve)
 # ggplot(influenza_NY, aes(x= influenza_NY$disease , y=count)) +
 #   geom_line(aes(color = week_ending_date))
 ```
+```{r}
+library(rio)
+library(ggplot2)
+library(dplyr)
+library(magrittr)
+library(outbreaks)
+library(incidence)
+library(epicontacts)
+library(distcrete)
+library(epitrix)
+library(earlyR)
+library(projections)
+
+i <- incidence(influenza_NY$week_ending_date, interval= "quarter")
+plot(i)
+i2 <- incidence(influenza_NY$week_ending_date, interval= "quarter", groups= influenza_NY$disease)
+plot(i2)
+
+```
+
 
