@@ -164,7 +164,12 @@ i <- incidence(influenza_NY$week_ending_date, interval= "quarter")
 plot(i)
 i2 <- incidence(influenza_NY$week_ending_date, interval= "quarter", groups= influenza_NY$disease)
 plot(i2)
+test <- get_R(i, disease= "influenza") #look up the sd, serial interval of influenza
 
+install.packages("R0")
+library(R0)
+install.packages("EpiEstim")
+library(EpiEstim)
 ```
 
 
