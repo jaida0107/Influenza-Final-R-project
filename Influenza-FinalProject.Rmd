@@ -101,7 +101,8 @@ library(patchwork)
 
 
 
-influenza_region <-ggplot(influenza_NY, aes(x=region, y=count)) +
+influenza_region <-ggplot(influenza_NY, aes(x=region, y=count,)) +
+  theme(text = element_text(size = 10)) +
   geom_boxplot()
 plot(influenza_region)
 
@@ -111,11 +112,12 @@ plot(influenza_disease)
 
 epicurve_influenza <- ggplot(influenza_NY, aes(x= influenza_NY$week_ending_date , y=count)) +
   geom_line(aes(color = disease)) +
+    labs(title = "Influenza Disease Type Trends",
+       y = "Count", x = "Year") +
+  coord_cartesian(ylim= c(0, 1500), expand = FALSE) +
   facet_wrap(disease ~ .)
 
 influenza_region/ epicurve_influenza
-
-
 ```
 
 
