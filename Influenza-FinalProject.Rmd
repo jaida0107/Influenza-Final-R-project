@@ -149,6 +149,10 @@ is_flu_season <- function(ds) {
   month <- as.numeric(format(dates, '%m'))
   return(month >= 10 | month <= 5)
 }
+ny_incid<- influenza_NY[,c("week_ending_date", "count")]
+
+ny_incid <- rename(ny_incid, "ds" = "week_ending_date") %>%
+rename("y" = "count")
 ny_incid$on_season <- is_flu_season(ny_incid$ds)
 ny_incid$off_season <- !is_flu_season(ny_incid$ds)
 
