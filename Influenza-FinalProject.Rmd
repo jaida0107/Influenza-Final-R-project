@@ -53,15 +53,23 @@ influenza_NY$disease <-as.factor(influenza_NY$disease)
 
 influenza_NY$county <-as.factor(influenza_NY$county)
 
-capital <- influenza_NY[which(influenza_NY$region == "CAPITAL DISTRICT"),]
-central <- influenza_NY[which(influenza_NY$region == "CENTRAL"),]
-metro <- influenza_NY[which(influenza_NY$region == "METRO"),]
-NYC <- influenza_NY[which(influenza_NY$region == "NYC"),]
-western <- influenza_NY[which(influenza_NY$region == "WESTERN"),]
+get_region <- function(region) { 
+  influenza_NY[which(influenza_NY$region == region),]
+}
 
-influenzaA<- influenza_NY[which(influenza_NY$disease == "INFLUENZA_A"),]
-influenzaB<- influenza_NY[which(influenza_NY$disease == "INFLUENZA_B"),]
-influenza_unknown<- influenza_NY[which(influenza_NY$disease== "INFLUENZA_UNSPECIFIED"),]
+capital <- get_region(region= "CAPITAL DISTRICT")
+central <- get_region(region = "CENTRAL")
+metro <- get_region(region= "METRO")
+NYC <- get_region(region = "NYC")
+western <- get_region(region = "WESTERN")
+
+get_diseasetype<- function(disease) { 
+  influenza_NY[which(influenza_NY$disease == disease),]
+}
+
+influenzaA<- get_diseasetype(disease = "INFLUENZA_A")
+influenzaB<- get_diseasetype(disease = "INFLUENZA_B")
+influenza_unknown<- get_diseasetype(disease = "INFLUENZA_UNSPECIFIED")
 
 
 ```
