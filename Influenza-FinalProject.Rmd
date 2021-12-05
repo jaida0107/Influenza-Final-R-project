@@ -105,13 +105,13 @@ library(pacman)
 library(incidence)
 
 
-# below code does not work
-# plot_bydisease <-influenza_NY %>% ggplot(aes(x=disease, y=count))
-# p+geom_point()
-# plot <-influenza_NY %>% ggplot(aes(x=county, y=count))
-# p+geom_point()
-# plot_byregion <-influenza_NY %>% ggplot(aes(x=region, y=count))
-# p+geom_point()
+
+plot_bydisease <-influenza_NY %>% ggplot(aes(x=disease, y=count))+
+geom_point()
+plot <-influenza_NY %>% ggplot(aes(x=county, y=count))+
+  geom_point()
+plot_byregion <-influenza_NY %>% ggplot(aes(x=region, y=count))+
+  geom_point()
 
 ggplot(influenza_NY, aes(x=region, y=count)) +
   geom_boxplot()
@@ -160,16 +160,37 @@ library(epitrix)
 library(earlyR)
 library(projections)
 
-i <- incidence(influenza_NY$week_ending_date, interval= "quarter")
+i <- as.data.frame(incidence(influenza_NY$week_ending_date)) %>%
+  rename("I" = "counts")
 plot(i)
-i2 <- incidence(influenza_NY$week_ending_date, interval= "quarter", groups= influenza_NY$disease)
+i2 <- as.incidence(influenza_NY$count, dates = influenza_NY$week_ending_date, interval = 7)
 plot(i2)
-test <- get_R(i, disease= "influenza") #look up the sd, serial interval of influenza
+ 
 
-install.packages("R0")
-library(R0)
-install.packages("EpiEstim")
-library(EpiEstim)
+# ny_incid <- rename(ny_incid, "ds" = "week_ending_date") %>%
+#   rename("y" = "count")
+is_flu_season <- function(ds) {
+  dates <- as.Date(ds)
+  month <- as.numeric(format(dates, '%m'))
+  return(month >= 10 | month <= 5)
+}
+ny_incid$on_season <- is_flu_season(ny_incid$ds)
+ny_incid$off_season <- !is_flu_season(ny_incid$ds)
+
+m <- prophet(weekly.seasonality=FALSE)
+m <- add_seasonality(m, name='weekly_on_season', period=7, fourier.order=3, condition.name='on_season')
+m <- add_seasonality(m, name='weekly_off_season', period=7, fourier.order=3, condition.name='off_season')
+m <- fit.prophet(m, ny_incid)
+
+forecast <- make_future_dataframe(m, periods= 104, freq = "week") %>%
+  filter(is_flu_season(ds))
+
+forecast$on_season <- is_flu_season(forecast$ds)
+forecast$off_season <- !is_flu_season(forecast$ds)
+
+f2 <- predict(m, forecast)
+
+prophet_plot_components(m, f2)
+dyplot.prophet(m, f2)
+
 ```
-
-
