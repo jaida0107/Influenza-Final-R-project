@@ -43,17 +43,13 @@ summary(influenza_NY)
 
 get_dupes(influenza_NY)
  influenza_NY$week_ending_date = as.Date(influenza_NY$week_ending_date , format = "%m/%d/%Y")
- class(influenza_NY$week_ending_date)
- is.na(influenza_NY$week_ending_date)
+ 
  data.frame(influenza_NY)
- #na.omit 
  remove_empty(influenza_NY)
 influenza_NY$region <-as.factor(influenza_NY$region)
-class(influenza_NY$region)
 nlevels(influenza_NY$region)
 as.factor(influenza_NY$region)
 influenza_NY$disease <-as.factor(influenza_NY$disease)
-class(influenza_NY$disease)
 
 influenza_NY$county <-as.factor(influenza_NY$county)
 
@@ -72,7 +68,6 @@ influenza_unknown<- influenza_NY[which(influenza_NY$disease== "INFLUENZA_UNSPECI
 
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
 ```{r}
-#data summarization
 
 rowMeans(influenza_NY[sapply(influenza_NY, is.numeric)])
 rowSums(influenza_NY[sapply(influenza_NY, is.numeric)])
@@ -99,76 +94,46 @@ t.test(NYC$count,capital$count)
 ```
 
 ```{r}
-#Data viszualization
 library(scales)
 library(pacman)
 library(incidence)
+library(patchwork)
 
 
 
-plot_bydisease <-influenza_NY %>% ggplot(aes(x=disease, y=count))+
-geom_point()
-plot <-influenza_NY %>% ggplot(aes(x=county, y=count))+
-  geom_point()
-plot_byregion <-influenza_NY %>% ggplot(aes(x=region, y=count))+
-  geom_point()
-
-ggplot(influenza_NY, aes(x=region, y=count)) +
+influenza_region <-ggplot(influenza_NY, aes(x=region, y=count)) +
   geom_boxplot()
-ggplot(influenza_NY, aes(x=disease, y=count)) +
+plot(influenza_region)
+
+influenza_disease<- ggplot(influenza_NY, aes(x=disease, y=count)) +
   geom_boxplot()
-ggplot(influenza_NY, aes(x=county, y=count)) +
-  geom_boxplot()
+plot(influenza_disease)
 
-
-
-ggplot(influenza_NY, aes(x= influenza_NY$week_ending_date , y=count)) +
-  geom_line(aes(color = week_ending_date))
-ggplot(influenza_NY, aes(x= influenza_NY$season , y=count)) +
-  geom_line(aes(color = season))
-ggplot(influenza_NY, aes(x= influenza_NY$week_ending_date , y=count)) +
+epicurve_influenza <- ggplot(influenza_NY, aes(x= influenza_NY$week_ending_date , y=count)) +
   geom_line(aes(color = disease)) +
-  facet_grid(disease ~ .)
+  facet_wrap(disease ~ .)
+
+influenza_region/ epicurve_influenza
 
 
-epicurve_daterange <- function() {
-  seq(from = as.Date("2009-10-10"), to = as.Date("2021-11-13"), by = 30,name = "Date")
-}
-
-epicurve <- ggplot(data = influenza_NY, aes(x = week_ending_date, group = disease, fill = disease))+
-  geom_histogram(aes(y = count), binwidth = 7, size = 0.1, stat = "identity", position="identity") +
-  scale_x_date(breaks = epicurve_daterange(), labels = epicurve_daterange())+
-  theme(axis.text.x= element_text(angle = 90, hjust = 1))+
-  scale_fill_manual(values=c("orange", "blue", "green", "purple"), name = "disease") + facet_grid(disease ~ .)+
-ggtitle("Epidemic Curve of Influenza")
-
-print(epicurve)
-
-# ggplot(influenza_NY, aes(x= influenza_NY$disease , y=count)) +
-#   geom_line(aes(color = week_ending_date))
 ```
+
+
 ```{r}
-library(rio)
 library(ggplot2)
 library(dplyr)
 library(magrittr)
 library(outbreaks)
-library(incidence)
-library(epicontacts)
-library(distcrete)
-library(epitrix)
 library(earlyR)
 library(projections)
+library(prophet)
 
-i <- as.data.frame(incidence(influenza_NY$week_ending_date)) %>%
+incidence_influenza_NY <- as.data.frame(incidence(influenza_NY$week_ending_date)) %>%
   rename("I" = "counts")
-plot(i)
-i2 <- as.incidence(influenza_NY$count, dates = influenza_NY$week_ending_date, interval = 7)
-plot(i2)
+plot(incidence_influenza_NY)
+incidence_influenza_NY2 <- as.incidence(influenza_NY$count, dates = influenza_NY$week_ending_date, interval = 7)
+plot(incidence_influenza_NY2)
  
-
-# ny_incid <- rename(ny_incid, "ds" = "week_ending_date") %>%
-#   rename("y" = "count")
 is_flu_season <- function(ds) {
   dates <- as.Date(ds)
   month <- as.numeric(format(dates, '%m'))
@@ -177,20 +142,21 @@ is_flu_season <- function(ds) {
 ny_incid$on_season <- is_flu_season(ny_incid$ds)
 ny_incid$off_season <- !is_flu_season(ny_incid$ds)
 
-m <- prophet(weekly.seasonality=FALSE)
-m <- add_seasonality(m, name='weekly_on_season', period=7, fourier.order=3, condition.name='on_season')
-m <- add_seasonality(m, name='weekly_off_season', period=7, fourier.order=3, condition.name='off_season')
-m <- fit.prophet(m, ny_incid)
+flu_season_predict<- prophet(weekly.seasonality=FALSE)
+flu_season_predict<- add_seasonality(flu_season_predict, name='weekly_on_season', period=7, fourier.order=3, condition.name='on_season')
+flu_season_predict<- add_seasonality(flu_season_predict, name='weekly_off_season', period=7, fourier.order=3, condition.name='off_season')
+flu_season_predict<- fit.prophet(flu_season_predict, ny_incid)
 
-forecast <- make_future_dataframe(m, periods= 104, freq = "week") %>%
+forecast <- make_future_dataframe(flu_season_predict, periods= 104, freq = "week") %>%
   filter(is_flu_season(ds))
 
 forecast$on_season <- is_flu_season(forecast$ds)
 forecast$off_season <- !is_flu_season(forecast$ds)
 
-f2 <- predict(m, forecast)
+f2 <- predict(flu_season_predict, forecast)
 
-prophet_plot_components(m, f2)
-dyplot.prophet(m, f2)
-
+plot_predictions<- prophet_plot_components(flu_season_predict, f2)
+ plot_predictions2<- dyplot.prophet(flu_season_predict, f2)
+ plot_predictions2
+ 
 ```
