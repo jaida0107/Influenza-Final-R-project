@@ -33,7 +33,6 @@ influenza_NY <-read_csv("Influenza_Laboratory-Confirmed_Cases_By_County__Beginni
 
 ## Data cleaning
 
-You can also embed plots, for example: // remove this
 
 ```{r pressure, echo=FALSE, include=FALSE}
 head(influenza_NY)
