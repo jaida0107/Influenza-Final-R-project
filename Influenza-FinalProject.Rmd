@@ -1,5 +1,5 @@
 ---
-title: "Untitled"
+title: "EPID 7500 Final Project"
 output:
   html_document: default
   pdf_document: default
@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 options(knitr.table.format = "latex")
 ```
 
-## R Markdown give description of doc here
+## This project analyzes the influenza seasins ikn New York during 2009-2021. Through data summarization with methods such as t-tests and boxplots, we anaylze the past and future influenza seasons. Then using the prophet packagem we can make predictions about the infleunza season for the next 2 years.
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
@@ -31,7 +31,7 @@ influenza_NY <-read_csv("Influenza_Laboratory-Confirmed_Cases_By_County__Beginni
   clean_names() %>% remove_empty()
 ```
 
-## Including Plots // add what you are doing in each chunk here
+## Data cleaning
 
 You can also embed plots, for example: // remove this
 
@@ -74,7 +74,7 @@ influenza_unknown<- get_diseasetype(disease = "INFLUENZA_UNSPECIFIED")
 
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Data summarization
 ```{r}
 
 rowMeans(influenza_NY[sapply(influenza_NY, is.numeric)])
@@ -101,6 +101,7 @@ t.test(NYC$count,capital$count)
 
 ```
 
+## Data Visualization
 ```{r}
 library(scales)
 library(pacman)
@@ -129,6 +130,7 @@ influenza_region/ epicurve_influenza
 ```
 
 
+## Utilizing Advanced R package: Prophet
 ```{r}
 library(ggplot2)
 library(dplyr)
