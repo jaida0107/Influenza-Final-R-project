@@ -112,7 +112,8 @@ library(patchwork)
 
 influenza_region <-ggplot(influenza_NY, aes(x=region, y=count,)) +
   theme(text = element_text(size = 10)) +
-  geom_boxplot()
+  geom_boxplot() +
+   labs(title = "Influenza by Region (a)") 
 plot(influenza_region)
 
 influenza_disease<- ggplot(influenza_NY, aes(x=disease, y=count)) +
