@@ -1,13 +1,16 @@
 ---
 title: "Untitled"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+options(knitr.table.format = "latex")
 ```
 
-## R Markdown
+## R Markdown give description of doc here
 
 This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
@@ -28,9 +31,9 @@ influenza_NY <-read_csv("Influenza_Laboratory-Confirmed_Cases_By_County__Beginni
   clean_names() %>% remove_empty()
 ```
 
-## Including Plots
+## Including Plots // add what you are doing in each chunk here
 
-You can also embed plots, for example:
+You can also embed plots, for example: // remove this
 
 ```{r pressure, echo=FALSE}
 head(influenza_NY)
@@ -42,13 +45,10 @@ summary(influenza_NY)
 
 
 get_dupes(influenza_NY)
- influenza_NY$week_ending_date = as.Date(influenza_NY$week_ending_date , format = "%m/%d/%Y")
- 
- data.frame(influenza_NY)
- remove_empty(influenza_NY)
+influenza_NY$week_ending_date = as.Date(influenza_NY$week_ending_date , format = "%m/%d/%Y")
+influenza_NY<- remove_empty(influenza_NY)
 influenza_NY$region <-as.factor(influenza_NY$region)
-nlevels(influenza_NY$region)
-as.factor(influenza_NY$region)
+
 influenza_NY$disease <-as.factor(influenza_NY$disease)
 
 influenza_NY$county <-as.factor(influenza_NY$county)
@@ -137,22 +137,18 @@ library(outbreaks)
 library(earlyR)
 library(projections)
 library(prophet)
-
-incidence_influenza_NY <- as.data.frame(incidence(influenza_NY$week_ending_date)) %>%
-  rename("I" = "counts")
-plot(incidence_influenza_NY)
-incidence_influenza_NY2 <- as.incidence(influenza_NY$count, dates = influenza_NY$week_ending_date, interval = 7)
-plot(incidence_influenza_NY2)
  
 is_flu_season <- function(ds) {
   dates <- as.Date(ds)
   month <- as.numeric(format(dates, '%m'))
   return(month >= 10 | month <= 5)
 }
+
 ny_incid<- influenza_NY[,c("week_ending_date", "count")]
 
 ny_incid <- rename(ny_incid, "ds" = "week_ending_date") %>%
-rename("y" = "count")
+rename("y" = "count") %>%
+  sample_frac(0.30)
 ny_incid$on_season <- is_flu_season(ny_incid$ds)
 ny_incid$off_season <- !is_flu_season(ny_incid$ds)
 
